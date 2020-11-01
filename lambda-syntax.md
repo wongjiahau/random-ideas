@@ -258,22 +258,50 @@ type People = {
 ### Tag types
 Tag is a special kind of string where its type is itself (in upper universe), under the hood it's just normal string. Moreover, it can be tagged with any other types.
 Tag types can be used to emulate nominal types, which is useful in discriminating string values that carry different semantics.
-For example,
+For example, 
 ```ts
 // Error-prone way
-type People {
+type People = {
   id: string
   phoneNumber: string
+}
+// Accidentally swapping id with phoneNumber won't trigger compile error
+people = People {
+  id: "+60123456789",
+  phoneNumber: "1234",
+}
+```
+The situtation above can be improved by using tagged types as such:
+```ts
+type People = {
+  id: #Id(string)
+  phoneNumber: #PhoneNumber(string)
+}
+
+// the following usage will result in compile error
+people = People {
+  id: #PhoneNumber("+60123456789"),
+  phoneNumber: #Id("1234"),
 }
 ```
 
 ### Sum Types
 Sum types (or disjoint union) in New is very similar to polymorphic variants of OCaml and discriminated union of Typescript, bascially it's a union of tagged types.
 Reason:
-1. Pattern matching can reuse the syntax of record destructuring, it means that no new grammar needed.
-2. constructors of a union can be reused by another union without having name collision error.
-3. union type can be inferred, meaning that no union types are required to be declared in advance
+1. constructors of a union can be reused by another union without having name collision error.
+2. union type can be inferred, meaning that no union types are required to be declared in advance
 
 Example:
 ```
+type Color = #Red | #Green | #Blue
+
+toHex = {
+  Color color;
+  string color.{
+    | #Red;
+  }
+#FF0000
+#00FF00
+#0000FF
+}
 ```
