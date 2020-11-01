@@ -44,7 +44,7 @@ expr'
   | record
   
 lambda 
-  = "{"  {assignable ";"}* expr "}"
+  = "{"  {assignable ","}* expr";"" "}"
   
 assignable 
   = [type] assignable'
@@ -62,7 +62,7 @@ Reason:
 1. allows better auto-complete experience in especially for record types, and destrcuturing patterns.
 For example, you will get suggestions of `name` as soon as you reach the cursor.
 ```ts
-type People = {string name; number age;}
+type People = {string name, number age,}
 p = People {n
             ^ assuming you typed until here
 ```
@@ -96,8 +96,8 @@ const square = (x: number) => {
 
 // In New
 square = {
-  number x;
-  number x.times(x)
+  number x,
+  number x.times(x);
   // ^ asserting the returned expression has number type
 }
 
@@ -129,17 +129,17 @@ const g = () => h(6)
 
 // new
 f = {
-  number x = 5;
-  x.cos.sin
+  number x = 5,
+  x.cos.sin;
 }
 g = {
-  number x = 6;
-  x.cos.sin
+  number x = 6,
+  x.cos.sin;
 }
 // refactoring does not change much of the original code
 h = {
-  number x;
-  x.cos.sin
+  number x,
+  x.cos.sin;
 }
 f = {5.h}
 g = {6.h}
@@ -150,7 +150,7 @@ g = {6.h}
 const f = () => {console.log('hello')}
 f()
 // new
-f = {console.log('hello')}
+f = {console.log('hello');}
 _.f
 ```
 ### with arguments
@@ -159,7 +159,7 @@ _.f
 f = (x: number): number => x + 1
 f(1)
 // new
-f = {number x; number x.plus(1)}
+f = {number x, number x.plus(1);}
 1.f
 ```
 
@@ -175,9 +175,9 @@ slice("Hello", 0)
 slice("Hello", 0, 2)
 // new
 slice = {
-  string s;
-  number from;
-  number to =? s.length;
+  string s,
+  number from,
+  number to =? s.length,
   ...
 }
 "Hello".slice(0)
@@ -191,7 +191,7 @@ Keyword arguments does not need special syntax declartion (like OCaml), and keyw
 f = ({a, b, c}: {a: number, b: number, c: number)) => {...}
 f({a: 1, b: 2, c: 3})
 // new
-f = { number a; number b; ...}
+f = { number a, number b, ...}
 1.f(2, c=3)
 ```
 
@@ -204,8 +204,8 @@ To opt-out of UFCS, we can use special expression `_` to indicate that we want t
 For example:
 ```ts
 moreThan = { 
-  number x;  
-  number y;  
+  number x,
+  number y,
   // body
 }
 // The following are equivalent
@@ -222,23 +222,23 @@ Reason:
 Currying examples:
 ```ts
 f = {
-  number a;
-  number b;
-  number c;
-  a.plus(b).minus(c)
+  number a,
+  number b,
+  number c,
+  a.plus(b).minus(c);
 }
 // a and b applied
-x = {number x; 1.f(2, x)}
+x = {number x, 1.f(2, x);}
 // same as
 x = 1.f(2,..)
 
 // a and c applied
-y = {number x; 1.f(x, 3)}
+y = {number x, 1.f(x, 3);}
 // same as
 y = 1.f(c=3,..)
 
 // b and c applied
-z = {number x; x.f(2, 3)}
+z = {number x, x.f(2, 3);}
 // same as
 z = _.f(b=2, b=3)
 ```
@@ -256,19 +256,19 @@ type People = {
 ```
 
 ### Tag types
-Tag is a special kind of string where its type is itself (in upper universe), under the hood it's just normal string. Moreover, it can be tagged with any other types.
+Tag is a special kind of string (that starts with `#`) where its type is itself (in upper universe), under the hood it's just normal string. Moreover, it can be tagged with any other types.
 Tag types can be used to emulate nominal types, which is useful in discriminating string values that carry different semantics.
 For example, 
 ```ts
 // Error-prone way
 type People = {
-  id: string
-  phoneNumber: string
+  id: string,
+  phoneNumber: string,
 }
 // Accidentally swapping id with phoneNumber won't trigger compile error
 people = People {
-  id: "+60123456789",
-  phoneNumber: "1234",
+  id= "+60123456789",
+  phoneNumber= "1234",
 }
 ```
 The situtation above can be improved by using tagged types as such:
@@ -280,8 +280,8 @@ type People = {
 
 // the following usage will result in compile error
 people = People {
-  id: #PhoneNumber("+60123456789"),
-  phoneNumber: #Id("1234"),
+  id= #PhoneNumber("+60123456789"),
+  phoneNumber= #Id("1234"),
 }
 ```
 
@@ -292,16 +292,61 @@ Reason:
 2. union type can be inferred, meaning that no union types are required to be declared in advance
 
 Example:
-```
-type Color = #Red | #Green | #Blue
+```ts
+type Color = {#red, #green, #blue, #yellow}
 
 toHex = {
-  Color color;
+  Color color,
   string color.{
-    | #Red;
-  }
-#FF0000
-#00FF00
-#0000FF
+    #red; "#FF0000",
+    #green; "#00FF00",
+    #blue; "0000FF",
+    other; "unknown",
+  };
 }
+#red.toHex.(console.log)
+```
+Another example:
+```ts
+type BinaryTree = {
+  Type T,
+  {
+    #Leaf,
+    #Node({
+      element: T,
+      left: T.BinaryTree,
+      right: T.BinaryTree
+    })
+  };
+}
+
+search = {
+  Type T = infer,
+  T.BinaryTree tree,
+  T value,
+  Boolean tree.{
+    #Leaf, 
+      #False;
+    #Node({element, left, right}),
+      element.equals(value).{
+        #True, 
+          #True;
+        #False,
+          left.search(value).or(right.search(value));
+      };
+  }
+}
+```
+
+## Pattern Matching
+Pattern matching is done with branched function, where the expression before each semicolon signifies a new branch, for example:
+```ts
+type Boolean = {#True, #False}
+(Boolean, Boolean).to(Boolean) or = {
+  #False, #False, #False;
+  _, _, #True;
+}
+
+// Usage
+#True.or(#False)
 ```
