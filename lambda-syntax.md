@@ -1,5 +1,6 @@
 # New language
 This document is compares the New syntax with Typescript/Haskell's syntax.
+Each syntax decision should be back with reasons, not just taste.
 
 ## Grammar
 Repitition rules:
@@ -24,7 +25,7 @@ valueDeclaration
  = [type] identifier "=" expr
  
  typeDeclaration
-   = identifier "=" type
+   = "type" identifier "=" type
  
 type 
   = literalType
@@ -43,10 +44,13 @@ expr'
   | record
   
 lambda 
-  = "{"  {variable ";"}* expr "}"
+  = "{"  {assignable ";"}* expr "}"
   
-variable 
-  = identifier type [("=" | "?=") expr]
+assignable 
+  = [type] assignable'
+
+assignable'
+  = 
   
 application
   = expr "." "(" {[identifier "="] expr ","}* ")"
@@ -80,12 +84,18 @@ answer = People {
   }
 }
 ```
-3. No new syntax is needed to specify the return type of a function 
+3. No new syntax is needed for specifying the return type of a function 
 For example,
 ```ts
 // In Typescript
 const square = (x: number): number => x * x
                           // ^ special syntax
+
+// Or using variable type annotation
+const square = (x: number) => {
+  const result: number = x * x
+  return result
+}
 
 // In New, we just need to assert the returned expression to a specific type
 square = {
@@ -98,9 +108,9 @@ square = {
 ## Function
 In New, function arguments are just variables that are not instantiated with any values.  
 Reason: this allow New to have reduced grammars, which implies that:
-- parser is easier to write
-- more consistent syntax (better user experience)
-- also it makes refactoring easier, for example:
+1. parser is easier to write
+2. more consistent syntax (better user experience)
+3. refactoring function produce cleaner diff, for example:
 ```ts
 // In typescript
 const f = () => {
@@ -137,8 +147,6 @@ h = {
 f = {5.h}
 g = {6.h}
 ```
-
-
 ### No argument 
 ```js
 // js
@@ -188,3 +196,9 @@ f({a: 1, b: 2})
 f = { number a; number b; ...}
 1.f(b=2)
 ```
+
+### Function application
+Function application (or invocation) in New uses the universal function call syntax (UFCS) because:
+1. allows IDE to suggestion autocompletion easily
+2. natural function chaining
+
