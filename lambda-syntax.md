@@ -1,5 +1,5 @@
-# Lambda Syntax
-This document is compares the new syntax idea with Typescript syntax.
+# New language
+This document is compares the New syntax with Typescript/Haskell's syntax.
 
 ## Grammar
 Repitition rules:
@@ -17,28 +17,129 @@ statement
   = declaration
   
 declaration
-  = identifier [typeAnnotation] "=" expr
-
-typeAnnotation 
-  = ":" type
+  = valueDeclaration
+  | typeDeclaration
+  
+valueDeclaration
+ = [type] identifier "=" expr
+ 
+ typeDeclaration
+   = identifier "=" type
+ 
+type 
+  = literalType
+  | recordType
+  | templateType
+  | aliasType
+  | functionType
+  | sumTypes
 
 expr
-  = expr' [typeAnnotation]
+  = [type] expr'
   
 expr'
   = lambda
   | application
+  | record
   
 lambda 
   = "{"  {variable ";"}* expr "}"
   
 variable 
-  = identifier typeAnnotation [("=" | "?=") expr]
+  = identifier type [("=" | "?=") expr]
   
 application
   = expr "." "(" {[identifier "="] expr ","}* ")"
 ```
-## no argument 
+## Type annotation
+Unlike most modern, New types are like C-like languages, where types comes before expressions. For example, instead of `x: number`, in New it's `number x`.
+Reason:
+1. allows better auto-complete experience
+For example, you will get suggestions of `name` as soon as you reach the cursor.
+```ts
+type People = {string name; number age;}
+p = People {n
+            ^ assuming you typed until here
+```
+2. allow expressions to be typed in a more readable way. Especially with record type, it might look like as if the aliased record type is being use as a constructor, but instead it's just a type assertion.
+For example, 
+```ts
+// In Elm
+answer = {
+  name = "John",
+  kid = {
+    hobby = "game"
+  } : Kid
+} : People
+
+// In New
+answer = People {
+  name = "John",
+  kid = Kid {
+    hobby = "game"
+  }
+}
+```
+3. No new syntax is needed to specify the return type of a function 
+For example,
+```ts
+// In Typescript
+const square = (x: number): number => x * x
+                          // ^ special syntax
+
+// In New, we just need to assert the returned expression to a specific type
+square = {
+  number x;
+  number x.times(x)
+  // ^ asserting the returned expression has number type
+}
+
+```
+## Function
+In New, function arguments are just variables that are not instantiated with any values.  
+Reason: this allow New to have reduced grammars, which implies that:
+- parser is easier to write
+- more consistent syntax (better user experience)
+- also it makes refactoring easier, for example:
+```ts
+// In typescript
+const f = () => {
+  const x: number = 5
+  return sin(cos(x))
+}
+const g = () => {
+  const x: number = 6
+  return sin(cos(x))
+}
+// Refactor f and g into a common function h,
+// which requires a lot of syntactical changes
+// thus producing uglier diffs
+const h = (x: number) => {
+  return sin(cos(x))
+}
+const f = () => h(5)
+const g = () => h(6)
+
+// new
+f = {
+  number x = 5;
+  x.cos.sin
+}
+g = {
+  number x = 6;
+  x.cos.sin
+}
+// refactoring does not change much of the original code
+h = {
+  number x;
+  x.cos.sin
+}
+f = {5.h}
+g = {6.h}
+```
+
+
+### No argument 
 ```js
 // js
 const f = () => {console.log('hello')}
@@ -47,23 +148,43 @@ f()
 f = {console.log('hello')}
 _.f
 ```
-## with arguments
+### with arguments
 ```js
 // js
-f = (x: number) => x + 1
+f = (x: number): number => x + 1
 f(1)
 // new
-f = {x: number; x.plus(1)}
+f = {number x; number x.plus(1)}
 1.f
 ```
 
-## optional arguments
+### optional arguments
 ```ts
 //ts
-slice = (s: string, from, to = s.length - 1) => 
-  s.slice(from, to)
+slice = (
+  s: string, 
+  from: number, 
+  to: number = s.length - 1
+): string => {...}
+slice("Hello", 0)
+slice("Hello", 0, 2)
 // new
 slice = {
-  s;
-} : string
+  string s;
+  number from;
+  number to =? s.length;
+  ...
+}
+"Hello".slice(0)
+"Hello".slice(0, 2)
+```
+
+### keywords argument
+```ts
+// ts
+f = ({a, b}: {a: number, b: number)) => {...}
+f({a: 1, b: 2})
+// new
+f = { number a; number b; ...}
+1.f(b=2)
 ```
