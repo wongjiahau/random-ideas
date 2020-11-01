@@ -1,5 +1,5 @@
 # Lambda Syntax
-This document is compares the new syntax idea with Javascript syntax.
+This document is compares the new syntax idea with Typescript syntax.
 
 ## Grammar
 Repitition rules:
@@ -10,22 +10,60 @@ Repitition rules:
 [ x ] = { x }?
 ```
 ```bnf
-lambda = "{" 
-  {argument ","}*
-"}"
-argument = identifier 
+program 
+  = {statement}+
+  
+statement 
+  = declaration
+  
+declaration
+  = identifier [typeAnnotation] "=" expr
+
+typeAnnotation 
+  = ":" type
+
+expr
+  = expr' [typeAnnotation]
+  
+expr'
+  = lambda
+  | application
+  
+lambda 
+  = "{"  {variable ";"}* expr "}"
+  
+variable 
+  = identifier typeAnnotation [("=" | "?=") expr]
+  
+application
+  = expr "." "(" {[identifier "="] expr ","}* ")"
 ```
 ## no argument 
 ```js
 // js
-() => {console.log('hello')}
+const f = () => {console.log('hello')}
+f()
 // new
-{console.log('hello')}
+f = {console.log('hello')}
+_.f
 ```
 ## with arguments
 ```js
 // js
-(x) => x + 1
+f = (x: number) => x + 1
+f(1)
 // new
-{x x.+(1)}
+f = {x: number; x.plus(1)}
+1.f
+```
+
+## optional arguments
+```ts
+//ts
+slice = (s: string, from, to = s.length - 1) => 
+  s.slice(from, to)
+// new
+slice = {
+  s;
+} : string
 ```
