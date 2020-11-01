@@ -44,14 +44,22 @@ expr'
   | record
   
 lambda 
-  = "{"  {assignable ","}* expr";"" "}"
+  = "{" {assignable ","}* expr "}"
+  | "{" {"|" {assignable ","}+ expr}+ "}"
   
 assignable 
   = [type] assignable'
 
 assignable'
-  = destructurePattern
+  = destructure
   | identifier
+  
+destructure
+  = tagDestructure
+  | recordDestructure
+
+tagDestructure
+  = tagLiteral ["(" destructure ")"]
   
 application
   = expr "." "(" {[identifier "="] expr ","}* ")"
@@ -97,7 +105,7 @@ const square = (x: number) => {
 // In New
 square = {
   number x,
-  number x.times(x);
+  number x.times(x)
   // ^ asserting the returned expression has number type
 }
 
@@ -130,16 +138,16 @@ const g = () => h(6)
 // new
 f = {
   number x = 5,
-  x.cos.sin;
+  x.cos.sin
 }
 g = {
   number x = 6,
-  x.cos.sin;
+  x.cos.sin
 }
 // refactoring does not change much of the original code
 h = {
   number x,
-  x.cos.sin;
+  x.cos.sin
 }
 f = {5.h}
 g = {6.h}
@@ -150,7 +158,7 @@ g = {6.h}
 const f = () => {console.log('hello')}
 f()
 // new
-f = {console.log('hello');}
+f = {console.log('hello')}
 _.f
 ```
 ### with arguments
@@ -159,7 +167,7 @@ _.f
 f = (x: number): number => x + 1
 f(1)
 // new
-f = {number x, number x.plus(1);}
+f = {number x, number x.plus(1)}
 1.f
 ```
 
@@ -225,20 +233,20 @@ f = {
   number a,
   number b,
   number c,
-  a.plus(b).minus(c);
+  a.plus(b).minus(c)
 }
 // a and b applied
-x = {number x, 1.f(2, x);}
+x = {number x, 1.f(2, x)}
 // same as
 x = 1.f(2,..)
 
 // a and c applied
-y = {number x, 1.f(x, 3);}
+y = {number x, 1.f(x, 3)}
 // same as
 y = 1.f(c=3,..)
 
 // b and c applied
-z = {number x, x.f(2, 3);}
+z = {number x, x.f(2, 3)}
 // same as
 z = _.f(b=2, b=3)
 ```
@@ -294,16 +302,21 @@ Reason:
 Example:
 ```ts
 // TODO: the following grammar can cause ambiguity to lambda
-type Color = {#red, #green, #blue, #yellow}
+type Color = {
+  | #red
+  | #green
+  | #blue 
+  | #yellow
+}
 
 toHex = {
   Color color,
   string color.{
-    #red; "#FF0000",
-    #green; "#00FF00",
-    #blue; "0000FF",
-    other; "unknown",
-  };
+  | #red, "#FF0000"
+  | #green, "#00FF00"
+  | #blue, "0000FF"
+  | other, "unknown"
+  }
 }
 #red.toHex.(console.log)
 ```
@@ -318,7 +331,7 @@ type BinaryTree = {
       left: T.BinaryTree,
       right: T.BinaryTree
     })
-  };
+  }
 }
 
 search = {
@@ -326,28 +339,70 @@ search = {
   T.BinaryTree tree,
   T value,
   Boolean tree.{
-    #Leaf, 
-      #False;
-    #Node({element, left, right}),
+  | #Leaf, 
+      #False
+  | #Node({element, left, right}),
       element.equals(value).{
-        #True, 
-          #True;
-        #False,
-          left.search(value).or(right.search(value));
+      | #True, 
+          #True
+      | #False,
+          left.search(value).or(right.search(value))
       };
   }
 }
 ```
 
 ## Pattern Matching
-Pattern matching is done with branched function, where the expression before each semicolon signifies a new branch, for example:
+Pattern matching is done with branched function, where the pipe `|` signifies a new branch, for example:
 ```ts
-type Boolean = {#True, #False}
+type Boolean = {| #True | #False}
 (Boolean, Boolean).to(Boolean) or = {
-  #False, #False, #False;
-  _, _, #True;
+| #False, #False, #False
+| _, _, #True
 }
 
 // Usage
 #True.or(#False)
+```
+## Monadic binding
+Sometimes, we only care about the happy path of a program and we want to ignore the bad path, but the function is non-trivial, we can end up in a very deeply nested pattern match.
+For example:
+```ts
+computeBounds = {
+    number.array xs,
+    sorted = xs.sort,
+    sorted.head.{
+    | #Some(lower), 
+        sorted.last.{
+          | #Some(upper),
+              #Some({lower, upper})
+          | #None
+        }
+    | #None
+  }
+}
+```
+We can rewrite the code above as below to improve the readability, it is very similar to Haskell do-notation, but not as powerful.
+```ts
+computeBounds = {
+  number.array xs,
+  sorted = xs.sort,
+  #Some(lower) = sorted.head, // <- The inferred return type contains #None
+  #Some(upper) = sorted.last,
+  #Some({lower, upper})
+}
+```
+How about in the case where we need to call different functions but each of them returns different types?  
+Suppose the same example as above but `head` returns `Option` but `last` returns `Result`. 
+In languages that uses non-polymorphic variants types, you will need to convert one of them to conformed to the same type, say converting `Option` to `Result`.  
+Fortunately, in New, you don't have to do all these conversions because variants are polymorphic, meaning that it's ok that the return type can be variants from either `Option` or `Result`.
+For example:
+```ts
+computeBounds = {
+  number.array xs,
+  sorted = xs.sort,
+  #Some(lower) = sorted.head, // <- The inferred return type is now {| #None }
+  #Ok(upper) = sorted.last, // <- The inferred return type is now {| #None, | #Error(String)}
+  #Some({lower, upper}) // <- The inferred return type is now {| #None, | #Error(String) | #Some({lower: number, upper: number})}
+}
 ```
