@@ -62,8 +62,8 @@ Reason:
 1. allows better auto-complete experience
 For example, you will get suggestions of `name` as soon as you reach the cursor.
 ```ts
-type People = [string name; number age;]
-p = People [n
+type People = {string name; number age;}
+p = People {n
             ^ assuming you typed until here
 ```
 2. allow expressions to be typed in a more readable way. Especially with record type, it might look like as if the aliased record type is being use as a constructor, but instead it's just a type assertion.
@@ -78,12 +78,12 @@ answer = {
 } : People
 
 // In New
-answer = People [
+answer = People {
   name = "John",
-  kid = Kid [
+  kid = Kid {
     hobby = "game"
-  ]
-]
+  }
+}
 ```
 3. Less boilerplate when asserting the type of the returned expression 
 For example,
