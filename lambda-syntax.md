@@ -59,7 +59,7 @@ application
 ## Type annotation
 Unlike most modern, New types are like C-like languages, where types comes before expressions. For example, instead of `x: number`, in New it's `number x`.
 Reason:
-1. allows better auto-complete experience
+1. allows better auto-complete experience in especially for record types, and destrcuturing patterns.
 For example, you will get suggestions of `name` as soon as you reach the cursor.
 ```ts
 type People = {string name; number age;}
@@ -185,13 +185,14 @@ slice = {
 ```
 
 ### keywords argument
+Keyword arguments does not need special syntax declartion (like OCaml), and keyword can only be specified after keywordless arguments.
 ```ts
 // ts
-f = ({a, b}: {a: number, b: number)) => {...}
-f({a: 1, b: 2})
+f = ({a, b, c}: {a: number, b: number, c: number)) => {...}
+f({a: 1, b: 2, c: 3})
 // new
 f = { number a; number b; ...}
-1.f(b=2)
+1.f(2, c=3)
 ```
 
 ### Function application
@@ -242,5 +243,37 @@ z = {number x; x.f(2, 3)}
 z = _.f(b=2, b=3)
 ```
 
-## Sum types
-Sum types in New is very similar to polymorphic variants of OCaml, where the constructors of a union can be reused by another union without having name collision error.
+## Types
+### Record types
+```
+type People = {
+  name: string
+  occupation: {
+    name: string
+    company: string
+  }
+}
+```
+
+### Tag types
+Tag is a special kind of string where its type is itself (in upper universe), under the hood it's just normal string. Moreover, it can be tagged with any other types.
+Tag types can be used to emulate nominal types, which is useful in discriminating string values that carry different semantics.
+For example,
+```ts
+// Error-prone way
+type People {
+  id: string
+  phoneNumber: string
+}
+```
+
+### Sum Types
+Sum types (or disjoint union) in New is very similar to polymorphic variants of OCaml and discriminated union of Typescript, bascially it's a union of tagged types.
+Reason:
+1. Pattern matching can reuse the syntax of record destructuring, it means that no new grammar needed.
+2. constructors of a union can be reused by another union without having name collision error.
+3. union type can be inferred, meaning that no union types are required to be declared in advance
+
+Example:
+```
+```
