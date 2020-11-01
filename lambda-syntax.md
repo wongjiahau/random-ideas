@@ -365,7 +365,7 @@ type Boolean = {| #True | #False}
 #True.or(#False)
 ```
 ## Monadic binding
-Sometimes, we only care about the happy path of a program and we want to ignore the bad path, but the function is non-trivial, we can end up in a very deeply nested pattern match.
+Sometimes, we only care about the happy path of a program and we want to ignore the bad path, but if the function is non-trivial, we can end up in a very deeply nested pattern match.
 For example:
 ```ts
 computeBounds = {
