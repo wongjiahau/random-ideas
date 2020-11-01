@@ -293,6 +293,7 @@ Reason:
 
 Example:
 ```ts
+// TODO: the following grammar can cause ambiguity to lambda
 type Color = {#red, #green, #blue, #yellow}
 
 toHex = {
