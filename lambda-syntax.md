@@ -50,7 +50,8 @@ assignable
   = [type] assignable'
 
 assignable'
-  = 
+  = destructurePattern
+  | identifier
   
 application
   = expr "." "(" {[identifier "="] expr ","}* ")"
@@ -61,8 +62,8 @@ Reason:
 1. allows better auto-complete experience
 For example, you will get suggestions of `name` as soon as you reach the cursor.
 ```ts
-type People = {string name; number age;}
-p = People {n
+type People = [string name; number age;]
+p = People [n
             ^ assuming you typed until here
 ```
 2. allow expressions to be typed in a more readable way. Especially with record type, it might look like as if the aliased record type is being use as a constructor, but instead it's just a type assertion.
@@ -77,27 +78,23 @@ answer = {
 } : People
 
 // In New
-answer = People {
+answer = People [
   name = "John",
-  kid = Kid {
+  kid = Kid [
     hobby = "game"
-  }
-}
+  ]
+]
 ```
-3. No new syntax is needed for specifying the return type of a function 
+3. Less boilerplate when asserting the type of the returned expression 
 For example,
 ```ts
 // In Typescript
-const square = (x: number): number => x * x
-                          // ^ special syntax
-
-// Or using variable type annotation
 const square = (x: number) => {
   const result: number = x * x
   return result
 }
 
-// In New, we just need to assert the returned expression to a specific type
+// In New
 square = {
   number x;
   number x.times(x)
@@ -202,3 +199,48 @@ Function application (or invocation) in New uses the universal function call syn
 1. allows IDE to suggestion autocompletion easily
 2. natural function chaining
 
+To opt-out of UFCS, we can use special expression `_` to indicate that we want to invoke a function without passing any arguments.
+For example:
+```ts
+moreThan = { 
+  number x;  
+  number y;  
+  // body
+}
+// The following are equivalent
+2.moreThan(3)
+_.moreThan(2, 3)
+```
+
+### Currying
+All functions in New can be curried using `..` syntax, why this special syntax is needed? Why not just make currying the default?
+Reason:
+1. default currying produces cryptic error message, it's often misleading especially when user accidentally missed out some arguments
+2. it's impossible to notice if a function is curried or applied completely just by reading the call-site without peeking at the function's definition
+
+Currying examples:
+```ts
+f = {
+  number a;
+  number b;
+  number c;
+  a.plus(b).minus(c)
+}
+// a and b applied
+x = {number x; 1.f(2, x)}
+// same as
+x = 1.f(2,..)
+
+// a and c applied
+y = {number x; 1.f(x, 3)}
+// same as
+y = 1.f(c=3,..)
+
+// b and c applied
+z = {number x; x.f(2, 3)}
+// same as
+z = _.f(b=2, b=3)
+```
+
+## Sum types
+Sum types in New is very similar to polymorphic variants of OCaml, where the constructors of a union can be reused by another union without having name collision error.
