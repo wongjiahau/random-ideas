@@ -406,3 +406,16 @@ computeBounds = {
   #Some({lower, upper}) // <- The inferred return type is now {| #None, | #Error(String) | #Some({lower: number, upper: number})}
 }
 ```
+Say we use the same example above, but we want to remove the `#Error` variant from the returned result, we can do as such:
+```ts
+computeBounds = {
+  number.array xs,
+  sorted = xs.sort,
+  #Some(lower) = sorted.head, 
+  #Ok(upper) = sorted.last.{
+  | #Error(_), #None
+  | other, other
+  }, 
+  #Some({lower, upper}) 
+}
+```
