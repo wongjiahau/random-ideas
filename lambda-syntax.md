@@ -419,3 +419,5 @@ computeBounds = {
   {lower: number, upper: number}.Option #Some({lower, upper}) 
 }
 ```
+## References
+1. Pattern Calculus. https://www.cas.mcmaster.ca/~kahl/Publications/Conf/Kahl-2004a.pdf
