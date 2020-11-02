@@ -87,9 +87,9 @@ answer = {
 
 // In New
 answer = People {
-  name = "John",
-  kid = Kid {
-    hobby = "game"
+  name: "John",
+  kid: Kid {
+    hobby: "game"
   }
 }
 ```
@@ -200,7 +200,7 @@ f = ({a, b, c}: {a: number, b: number, c: number)) => {...}
 f({a: 1, b: 2, c: 3})
 // new
 f = { number a, number b, ...}
-1.f(2, c=3)
+1.f(2, c: 3)
 ```
 
 ### Function application
@@ -219,6 +219,23 @@ moreThan = {
 // The following are equivalent
 2.moreThan(3)
 _.moreThan(2, 3)
+```
+
+### Swapping argument position
+By default, in the UFCS notation, the first argument binds with the topmost variable. However, we can make the first argument to bind with other variable using keyword arguments.
+For example, suppose we have a minus function:
+```ts
+minus = {
+  number left,
+  number right,
+  ...
+}
+```
+Then following are equivalent:
+```
+9.minus(2)
+9.minus(left: 2)
+2.minus(right: 9)
 ```
 
 ### Currying
@@ -282,8 +299,8 @@ people = People {
 The situtation above can be improved by using tagged types as such:
 ```ts
 type People = {
-  id: #Id(string)
-  phoneNumber: #PhoneNumber(string)
+  #Id(string) id,
+  #PhoneNumber(string) phoneNumber
 }
 
 // the following usage will result in compile error
@@ -309,6 +326,7 @@ type Color = {
   | #yellow
 }
 
+Color,string
 toHex = {
   Color color,
   string color.{
@@ -325,11 +343,11 @@ Another example:
 type BinaryTree = {
   Type T,
   {
-    #Leaf,
-    #Node({
-      element: T,
-      left: T.BinaryTree,
-      right: T.BinaryTree
+  | #Leaf,
+  | #Node({
+      T element,
+      T.BinaryTree left,
+      T.BinaryTree right
     })
   }
 }
