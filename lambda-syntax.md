@@ -416,6 +416,6 @@ computeBounds = {
   | #Ok(upper), #Some(upper)
   | #Error(_), #None
   }, 
-  number.Result #Some({lower, upper}) 
+  {lower: number, upper: number}.Option #Some({lower, upper}) 
 }
 ```
