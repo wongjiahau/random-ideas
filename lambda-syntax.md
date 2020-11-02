@@ -364,7 +364,7 @@ type Boolean = {| #True | #False}
 // Usage
 #True.or(#False)
 ```
-## Monadic binding
+## Monadic bindings
 Sometimes, we only care about the happy path of a program and we want to ignore the bad path, but if the function is non-trivial, we can end up in a very deeply nested pattern match.
 For example:
 ```ts
@@ -382,7 +382,7 @@ computeBounds = {
   }
 }
 ```
-We can rewrite the code above as below to improve the readability, it is very similar to Haskell do-notation, but not as powerful.
+We can rewrite the code above as below to improve the readability using monadic bindings:
 ```ts
 computeBounds = {
   number.array xs,
