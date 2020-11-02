@@ -412,10 +412,10 @@ computeBounds = {
   number.array xs,
   sorted = xs.sort,
   #Some(lower) = sorted.head, 
-  #Ok(upper) = sorted.last.{
+  #Some(upper) = sorted.last.{
+  | #Ok(upper), #Some(upper)
   | #Error(_), #None
-  | other, other
   }, 
-  #Some({lower, upper}) 
+  number.Result #Some({lower, upper}) 
 }
 ```
