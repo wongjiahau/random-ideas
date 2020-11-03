@@ -45,7 +45,7 @@ expr'
   
 lambda 
   = "{" {assignable ","}* expr "}"
-  | "{" {"|" {assignable ","}+ expr}+ "}"
+  | "{" {{assignable ","}+ expr ";"}+ "}"
   
 assignable 
   = [type] assignable'
@@ -62,7 +62,7 @@ tagDestructure
   = tagLiteral ["(" destructure ")"]
   
 application
-  = expr "." "(" {[identifier "="] expr ","}* ")"
+  = expr "." "(" {[identifier ":"] expr ","}* ")"
 ```
 ## Type annotation
 Unlike most modern, New types are like C-like languages, where types comes before expressions. For example, instead of `x: number`, in New it's `number x`.
@@ -239,6 +239,7 @@ Then following are equivalent:
 ```
 
 ### Currying
+*Note: is this necessary?*
 All functions in New can be curried using `..` syntax, why this special syntax is needed? Why not just make currying the default?
 Reason:
 1. default currying produces cryptic error message, it's often misleading especially when user accidentally missed out some arguments
@@ -265,19 +266,25 @@ y = 1.f(c=3,..)
 // b and c applied
 z = {number x, x.f(2, 3)}
 // same as
-z = _.f(b=2, b=3)
+z = _.f(b: 2, c: 3)
 ```
 
 ## Types
 ### Record types
+*Dilemma: if types come before variable, record type will look very awkward.*
+*Another note: I guess it's fine, it can be weird either way*
 ```
 type People = {
-  name: string
-  occupation: {
-    name: string
-    company: string
-  }
+  String name,
+  {
+    String name,
+    String company
+  } occupation,
 }
+```
+### Function types,
+```ts
+{number a, number b, number}
 ```
 
 ### Tag types
@@ -287,13 +294,13 @@ For example,
 ```ts
 // Error-prone way
 type People = {
-  id: string,
-  phoneNumber: string,
+  string id,
+  string phoneNumber: string,
 }
 // Accidentally swapping id with phoneNumber won't trigger compile error
 people = People {
-  id= "+60123456789",
-  phoneNumber= "1234",
+  id: "+60123456789",
+  phoneNumber: "1234",
 }
 ```
 The situtation above can be improved by using tagged types as such:
@@ -305,8 +312,8 @@ type People = {
 
 // the following usage will result in compile error
 people = People {
-  id= #PhoneNumber("+60123456789"),
-  phoneNumber= #Id("1234"),
+  id: #PhoneNumber("+60123456789"),
+  phoneNumber: #Id("1234"),
 }
 ```
 
@@ -318,22 +325,21 @@ Reason:
 
 Example:
 ```ts
-// TODO: the following grammar can cause ambiguity to lambda
 type Color = {
-  | #red
-  | #green
-  | #blue 
-  | #yellow
+  #red,
+  #green,
+  #blue,
+  #yellow,
 }
 
 Color,string
 toHex = {
   Color color,
   string color.{
-  | #red, "#FF0000"
-  | #green, "#00FF00"
-  | #blue, "0000FF"
-  | other, "unknown"
+    #red, "#FF0000";
+    #green, "#00FF00";
+    #blue, "0000FF";
+    other, "unknown";
   }
 }
 #red.toHex.(console.log)
@@ -343,8 +349,8 @@ Another example:
 type BinaryTree = {
   Type T,
   {
-  | #Leaf,
-  | #Node({
+   #Leaf,
+   #Node({
       T element,
       T.BinaryTree left,
       T.BinaryTree right
@@ -352,20 +358,22 @@ type BinaryTree = {
   }
 }
 
+{
+  Type T,
+  T.BinaryTree tree,
+  T value,
+  return Boolean
+}
 search = {
-  Type T = infer,
+  Type T,
   T.BinaryTree tree,
   T value,
   Boolean tree.{
-  | #Leaf, 
-      #False
-  | #Node({element, left, right}),
-      element.equals(value).{
-      | #True, 
-          #True
-      | #False,
-          left.search(value).or(right.search(value))
-      };
+  #Leaf, 
+    return #False
+  #Node({element, left, right}),
+    #False = element.equals(value),
+    return left.search(value).or(right.search(value))
   }
 }
 ```
@@ -375,8 +383,8 @@ Pattern matching is done with branched function, where the pipe `|` signifies a 
 ```ts
 type Boolean = {| #True | #False}
 (Boolean, Boolean).to(Boolean) or = {
-| #False, #False, #False
-| _, _, #True
+#False, #False, return #False
+_, _, return #True
 }
 
 // Usage
@@ -437,5 +445,7 @@ computeBounds = {
   {lower: number, upper: number}.Option #Some({lower, upper}) 
 }
 ```
+## Promise
+*TODO*
 ## References
 1. Pattern Calculus. https://www.cas.mcmaster.ca/~kahl/Publications/Conf/Kahl-2004a.pdf
