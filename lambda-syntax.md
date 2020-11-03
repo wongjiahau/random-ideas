@@ -396,16 +396,16 @@ Sometimes, we only care about the happy path of a program and we want to ignore 
 For example:
 ```ts
 computeBounds = {
-    number.array xs,
-    sorted = xs.sort,
-    sorted.head.{
-    | #Some(lower), 
-        sorted.last.{
-          | #Some(upper),
-              #Some({lower, upper})
-          | #None
-        }
+  number.array xs,
+  sorted = xs.sort,
+  sorted.head.{
+  | #Some(lower), 
+    sorted.last.{
+    | #Some(upper),
+        #Some({lower, upper})
     | #None
+    }
+  | #None
   }
 }
 ```
