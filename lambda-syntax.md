@@ -369,11 +369,11 @@ search = {
   T.BinaryTree tree,
   T value,
   Boolean tree.{
-  #Leaf, 
-    return #False
-  #Node({element, left, right}),
+  |#Leaf, 
+    #False
+  |#Node({element, left, right}),
     #False = element.equals(value),
-    return left.search(value).or(right.search(value))
+    left.search(value).or(right.search(value))
   }
 }
 ```
@@ -382,9 +382,10 @@ search = {
 Pattern matching is done with branched function, where the pipe `|` signifies a new branch, for example:
 ```ts
 type Boolean = {| #True | #False}
-(Boolean, Boolean).to(Boolean) or = {
-#False, #False, return #False
-_, _, return #True
+{Boolean, Boolean, Boolean} 
+or = {
+  | #False, #False, #False
+  | _, _, #True
 }
 
 // Usage
