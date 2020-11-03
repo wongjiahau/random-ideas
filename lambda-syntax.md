@@ -603,6 +603,25 @@ getNetPrice = {
 
 
 ## Promise
-*TODO*
+Code needs to be transpiled into continutation passing style (CPS).
+Transpiled JS:
+```ts
+// Typescript
+type Result<T, E> = {
+  $: 'resolved',
+  value: T
+} | {
+  $: 'rejected',
+  error: E
+}
+const runPromise = <T, E>(
+  promise: Promise<T,E>,
+  f: Result<T, E>
+) => {
+  promise
+    .then(value => f({$:'resolved', value}))
+    .catch(error => f({$: 'rejected', error})
+}
+```
 ## References
 1. Pattern Calculus. https://www.cas.mcmaster.ca/~kahl/Publications/Conf/Kahl-2004a.pdf
