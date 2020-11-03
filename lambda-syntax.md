@@ -434,16 +434,17 @@ computeBounds = {
 ```
 Say we use the same example above, but we want to remove the `#Error` variant from the returned result, we can do as such:
 ```ts
-computeBounds = {
+(number.array, {number lower, number upper}.Option)
+computeBounds = (
   number.array xs,
   sorted = xs.sort,
   #Some(lower) = sorted.head, 
-  #Some(upper) = sorted.last.{
+  #Some(upper) = sorted.last.(
   | #Ok(upper), #Some(upper)
   | #Error(_), #None
-  }, 
-  {lower: number, upper: number}.Option #Some({lower, upper}) 
-}
+  ), 
+  #Some({lower, upper}) 
+)
 ```
 ## Promise
 *TODO*
