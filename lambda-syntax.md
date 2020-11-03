@@ -482,39 +482,6 @@ main = {
   #NoLuck
 }
 ```
-Transpiled Javascript (for compiler devs):
-```js
-function getFortune() {
-  const x = random();
-  const result = equals(mod(x, 2), 1);
-  switch(result.$) {
-    case 'true': {
-      return {$: 'surprise', $$: x}
-    }
-    default: {
-      
-    }
-  }
-  x.mod(2).equals(1).{
-    | #True, #Surpise(x)
-    | _, #Nothing
-  }
-}
-getSurprise = {
-  x = .random,
-  x.mod(2).equals(1).{
-    | #True, #Surpise("You got a present")
-    | _, #Nope
-  }
-}
-main = {
-  #Nothing = .getFortune,
-  #Nope = .getSurprise,
-  #NoLuck
-  // Error, #Surprise(number) and #Surprise(string) cannot form a tagged union,
-  // because number and string cannot be discriminated
-}
-```
 To resolve this problem, we can simply rewrap one of the `#Surprise` result to another tag.
 ```ts
 main = {
@@ -523,6 +490,46 @@ main = {
   },
   #Nope = .getSurprise,
   #NoLuck
+}
+```
+
+Transpiled Javascript for the code snipper above (for compiler devs):
+```js
+function getFortune() {
+  const x = random();
+  const result = equals(mod(x, 2), 1);
+  switch(result.$) {
+    case 'True':  return {$: 'surprise', _: x}
+    default:  return {$: 'Nothing'}
+  }
+}
+function getSurprise() {
+  const x = random()
+  const result = equals(mod(x, 2), 1)
+  switch(result.$) {
+    case 'True':  return {$: 'Surprise', _: "You got a present"}
+    default:  return {$: 'Nope'}
+  }
+}
+function main {
+  const v1 = getFortune()
+  switch(v1.$) {
+    case 'Nothing': {
+      const v2 = (() => {
+        const v2 = getSurprise()
+        switch(v2.$) {
+          case 'Surprise': return {$: 'FortuneSurprise', _: $._}
+          default: return v2
+        }
+      })()
+      switch(v2.$) {
+        case 'Nope': return {$: 'NoLuck'}
+        default: return v2
+      }
+    }
+    default:
+      return v1
+  }
 }
 ```
 
