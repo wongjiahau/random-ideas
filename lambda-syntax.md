@@ -446,6 +446,146 @@ computeBounds = (
   #Some({lower, upper}) 
 )
 ```
+### Monadic binding (edge cases)
+In the case where the return types of the non-happy contains types with the same variant but different payload type, it will be a compile error. 
+For example, the following code is invalid:
+```ts
+getFortune = {
+  x = .random,
+  x.mod(2).equals(1).{
+    | #True, #Surpise(x)
+    | _, #Nothing
+  }
+}
+getSurprise = {
+  x = .random,
+  x.mod(2).equals(1).{
+    | #True, #Surpise("You got a present")
+    | _, #Nope
+  }
+}
+main = {
+  #Nothing = .getFortune,
+  #Nope = .getSurprise,
+  #NoLuck
+  // Error, #Surprise(number) and #Surprise(string) cannot form a tagged union,
+  // because number and string cannot be discriminated
+}
+```
+To resolve this problem, we can simply rewrap one of the `#Surprise` result to another tag.
+```ts
+main = {
+  #Nothing = .getFortune.{
+    #Surprise(x), #FortuneSurpise(x)
+  },
+  #Nope = .getSurprise,
+  #NoLuck
+}
+```
+Transpiled Javascript (for compiler devs):
+```js
+function getFortune() {
+  const x = random();
+  const result = equals(mod(x, 2), 1);
+  switch(result.$) {
+    case 'true': {
+      return {$: 'surprise', $$: x}
+    }
+    default: {
+      
+    }
+  }
+  x.mod(2).equals(1).{
+    | #True, #Surpise(x)
+    | _, #Nothing
+  }
+}
+getSurprise = {
+  x = .random,
+  x.mod(2).equals(1).{
+    | #True, #Surpise("You got a present")
+    | _, #Nope
+  }
+}
+main = {
+  #Nothing = .getFortune,
+  #Nope = .getSurprise,
+  #NoLuck
+  // Error, #Surprise(number) and #Surprise(string) cannot form a tagged union,
+  // because number and string cannot be discriminated
+}
+```
+To resolve this problem, we can simply rewrap one of the `#Surprise` result to another tag.
+```ts
+main = {
+  #Nothing = .getFortune.{
+    #Surprise(x), #FortuneSurpise(x)
+  },
+  #Nope = .getSurprise,
+  #NoLuck
+}
+```
+
+### Unhandled cases
+In New, it's not necessary to handle all cases, but that doesn't mean the type system is unsound, because all unhandled case will just return the same value. This is possible because the variants are polymorphic.  
+For example:
+```ts
+type Shape = {
+  | #Dot
+  | #Circle({radius})
+}
+
+area = {
+  Shape shape,
+  shape.{
+    #Circle({radius}), #Some(radius)
+  }
+}
+```
+The above `area` function does not handle the `#Rectangle` variant, but there's no type error, simply because the inferred return type of the function is `{|#Some(number) | #Dot}`.  
+
+However, if the `area` function is re-written as below, then there will be a compile error, because only tagged union is allow.
+```ts
+area = {
+  Shape shape,
+  shape.{
+    #Circle({radius}), radius
+    // ERROR: cannot form a tagged union with "number"
+    // TIP: consider wrapping "number" with a tag,
+    //      For example, "#Some(number)"
+  }
+}
+```
+Why is this **unhandled cases** feature useful?  It's especially useful when we want to handle the non-happy path explicitly in monadic bindings.
+
+Say the function below that does not utilise this feature:
+```ts
+getNetPrice = {
+  Item item,
+  #Ok(sellingPrice) = item.getSellingPrice.{
+    #Error(_), #None,
+    other, other
+  },
+  #Ok(grossPrice) = item.getGrossPrice.{
+    #Error(_), #None,
+    other, other
+  }
+}
+```
+By utilising this feature, the `other, other` branch is unnecessary:
+```ts
+getNetPrice = {
+  Item item,
+  #Ok(sellingPrice) = item.getSellingPrice.{
+    #Error(_), #None,
+  },
+  #Ok(grossPrice) = item.getGrossPrice.{
+    #Error(_), #None,
+  }
+}
+```
+
+
 ## Promise
 *TODO*
 ## References
