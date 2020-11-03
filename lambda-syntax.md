@@ -435,18 +435,26 @@ computeBounds = {
 ```
 Say we use the same example above, but we want to remove the `#Error` variant from the returned result, we can do as such:
 ```ts
-(number.array, {number lower, number upper}.Option)
-computeBounds = (
+{number.array, {number lower, number upper}.Option}
+computeBounds = {
   number.array xs,
   sorted = xs.sort,
   #Some(lower) = sorted.head, 
-  #Some(upper) = sorted.last.(
+  #Some(upper) = sorted.last.{
   | #Ok(upper), #Some(upper)
   | #Error(_), #None
-  ), 
+  }, 
   #Some({lower, upper}) 
-)
+}
 ```
+### Should we use monadic bindings?
+Yes, in fact it's encouraged, because it makes the resulting code less nested thus much more readable, which is the idea behind [Railway Programming](https://fsharpforfunandprofit.com/rop/) (some personal opinion: Railway Programming is actually not easy in most functional languages because their variants are closed by default, in other words you cannot combine variants from different union to form a new union implicitly).  
+
+This programming method is also especially useful for prototyping, because to make a proof-of-concept (POC), usually only the happy path is considered.  
+In language like Haskell or Rust where you are forced to handle the sad path, either you really handle them (which is worthless for POC) or you throw a bomb at those branch, i.e., terminate the program when those branch are hit.  
+However, with the flexibilty of variants in New, you don't have to plant bomb everywhere, what you need to do is just to let them bubble up, and handle them explicitly.
+The main advantage of this approach is that you won't have to worry your production server terminating when those unhandled branches are hit. Nevertheless, it means that its harder to trace exactly where the unhandled branches are.
+
 ### Monadic binding (edge cases)
 In the case where the return types of the non-happy contains types with the same variant but different payload type, it will be a compile error. 
 For example, the following code is invalid:
