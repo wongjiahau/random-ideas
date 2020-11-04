@@ -152,15 +152,36 @@ h = {
 f = {5.h}
 g = {6.h}
 ```
-### No argument 
+### No argument
+There's no function without argument in New, if a function has no argument it's evaluted immediately, the following function in JS and New are equivalent.
 ```js
 // js
-const f = () => {console.log('hello')}
-f()
+const f = (() => {
+  const x = "hello"
+  const y = " world"
+  return x + y
+})
+
 // new
-f = {console.log('hello')}
-.f
+f = {
+  x = "hello",
+  y = "world ",
+  x.concat(y)
+}
 ```
+In order to create a function without argument, you can use the special variable `_`:
+```ts
+f = {
+  _,
+  x = "hello",
+  y = "world "
+  x.concat(y)
+}
+
+// To invoke it
+_.f
+```
+
 ### with arguments
 ```js
 // js
@@ -237,30 +258,6 @@ db.findUser(id: "123")
 .(db.findUser)(id: "123")
 ```
 *Note: the syntax above needs to be solved, if not it's very awkward*
-Some weird idea: how about differentiating property access from fuction application? Maybe `.` for property access, `-` for function invocation, where `-` has lower precedence than `.`, then the example above can be less awkward.
-```ts
--db.user.find(id: "123")
-// or
-"123"-db.user.find
-
-// Factorial function using with syntax
-factorial = {
-  int n,
-  n-lessThanEqual(1)-{
-  | #True, 1
-  | #False, n-minus(1)-times(n-factorial)
-  }
-}
-// Tbh it's freaking weird but `-` seems like a good idea for pattern matching syntax:
-factorial = {
-  - int n
-  n.lessThanEqual(1).{
-    - #True 1
-    - #False n.minus(1).times(n.factorial)
-  }
-}
-```
-
 ### Swapping argument position
 By default, in the UFCS notation, the first argument binds with the topmost variable. However, we can make the first argument to bind with other variable using keyword arguments.
 For example, suppose we have a minus function:
@@ -324,7 +321,8 @@ type People = {
 ```
 ### Function types,
 ```ts
-{number a, number b, number}
+// Some suggestions
+{number a, number b, return number}
 ```
 
 ### Tag types
@@ -372,7 +370,7 @@ type Color = {
   #yellow,
 }
 
-Color,string
+{Color color, return string}
 toHex = {
   Color color,
   string color.{
@@ -386,16 +384,13 @@ toHex = {
 ```
 Another example:
 ```ts
-type BinaryTree = {
-  Type T,
-  {
-   #Leaf,
-   #Node({
-      T element,
-      T.BinaryTree left,
-      T.BinaryTree right
-    })
-  }
+type BinaryTree = <T>{
+| #Leaf
+| #Node({
+    T element,
+    T.BinaryTree left,
+    T.BinaryTree right
+  })
 }
 
 {
