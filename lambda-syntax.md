@@ -244,14 +244,21 @@ Some weird idea: how about differentiating property access from fuction applicat
 "123"-db.user.find
 
 // Factorial function using with syntax
-factorial {
+factorial = {
   int n,
   n-lessThanEqual(1)-{
   | #True, 1
   | #False, n-minus(1)-times(n-factorial)
   }
 }
-// Tbh it's freaking weird
+// Tbh it's freaking weird but `-` seems like a good idea for pattern matching syntax:
+factorial = {
+  - int n
+  n.lessThanEqual(1).{
+    - #True 1
+    - #False n.minus(1).times(n.factorial)
+  }
+}
 ```
 
 ### Swapping argument position
