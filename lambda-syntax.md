@@ -319,10 +319,11 @@ type People = {
   } occupation,
 }
 ```
+*Note: there's a problem, how do we know the above syntax means an object or a function?*
 ### Function types,
 ```ts
 // Some suggestions
-{number a, number b, return number}
+<T1, T2>{number a, number b, return number}
 ```
 
 ### Tag types
@@ -333,7 +334,7 @@ For example,
 // Error-prone way
 type People = {
   string id,
-  string phoneNumber: string,
+  string phoneNumber,
 }
 // Accidentally swapping id with phoneNumber won't trigger compile error
 people = People {
