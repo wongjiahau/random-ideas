@@ -221,6 +221,39 @@ moreThan = {
 .moreThan(2, 3)
 ```
 
+### Problems
+Invoking a function of a property of a record becomes weird:
+```ts
+db = {
+  findUser: {
+    string id,
+    ...
+  }
+}
+// the following is incorrect
+db.findUser(id: "123")
+
+// The correct version should be
+.(db.findUser)(id: "123")
+```
+*Note: the syntax above needs to be solved, if not it's very awkward*
+Some weird idea: how about differentiating property access from fuction application? Maybe `.` for property access, `-` for function invocation, where `-` has lower precedence than `.`, then the example above can be less awkward.
+```ts
+-db.user.find(id: "123")
+// or
+"123"-db.user.find
+
+// Factorial function using with syntax
+factorial {
+  int n,
+  n-lessThanEqual(1)-{
+  | #True, 1
+  | #False, n-minus(1)-times(n-factorial)
+  }
+}
+// Tbh it's freaking weird
+```
+
 ### Swapping argument position
 By default, in the UFCS notation, the first argument binds with the topmost variable. However, we can make the first argument to bind with other variable using keyword arguments.
 For example, suppose we have a minus function:
