@@ -159,7 +159,7 @@ const f = () => {console.log('hello')}
 f()
 // new
 f = {console.log('hello')}
-_.f
+.f
 ```
 ### with arguments
 ```js
@@ -218,7 +218,7 @@ moreThan = {
 }
 // The following are equivalent
 2.moreThan(3)
-_.moreThan(2, 3)
+.moreThan(2, 3)
 ```
 
 ### Swapping argument position
@@ -239,7 +239,7 @@ Then following are equivalent:
 ```
 
 ### Currying
-*Note: is this necessary?*
+*Note to self: is this necessary?*
 All functions in New can be curried using `..` syntax, why this special syntax is needed? Why not just make currying the default?
 Reason:
 1. default currying produces cryptic error message, it's often misleading especially when user accidentally missed out some arguments
@@ -266,7 +266,7 @@ y = 1.f(c=3,..)
 // b and c applied
 z = {number x, x.f(2, 3)}
 // same as
-z = _.f(b: 2, c: 3)
+z = .f(b: 2, c: 3)
 ```
 
 ## Types
