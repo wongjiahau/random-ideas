@@ -44,8 +44,8 @@ expr'
   | record
   
 lambda 
-  = "{" {assignable ","}* expr "}"
-  | "{" {{assignable ","}+ expr ";"}+ "}"
+  = "(" {assignable ","}* expr ")"
+  | "(" {{assignable ","}+ expr ";"}+ ")"
   
 assignable 
   = [type] assignable'
@@ -103,11 +103,11 @@ const square = (x: number) => {
 }
 
 // In New
-square = {
+square = (
   number x,
   number x.times(x)
   // ^ asserting the returned expression has number type
-}
+)
 
 ```
 ## Function
@@ -136,21 +136,23 @@ const f = () => h(5)
 const g = () => h(6)
 
 // new
-f = {
+f = (
+  _,
   number x = 5,
   x.cos.sin
-}
-g = {
+)
+g = (
+  _,
   number x = 6,
   x.cos.sin
-}
+)
 // refactoring does not change much of the original code
-h = {
+h = (
   number x,
   x.cos.sin
-}
-f = {5.h}
-g = {6.h}
+)
+f = (_, 5.h)
+g = (_, 6.h)
 ```
 ### No argument
 There's no function without argument in New, if a function has no argument it's evaluted immediately, the following function in JS and New are equivalent.
@@ -163,20 +165,20 @@ const f = (() => {
 })
 
 // new
-f = {
+f = (
   x = "hello",
   y = "world ",
   x.concat(y)
-}
+)
 ```
 In order to create a function without argument, you can use the special variable `_`:
 ```ts
-f = {
+f = (
   _,
   x = "hello",
   y = "world "
   x.concat(y)
-}
+)
 
 // To invoke it
 _.f
