@@ -111,17 +111,17 @@ const g = () => h(6)
 // new
 f = (
   _,
-  x number = 5,
+  x Number = 5,
   x.cos.sin
 )
 g = (
   _,
-  number x = 6,
+  x Number = 6,
   x.cos.sin
 )
 // refactoring does not change much of the original code
 h = (
-  number x,
+  x number,
   x.cos.sin
 )
 f = (_, 5.h)
