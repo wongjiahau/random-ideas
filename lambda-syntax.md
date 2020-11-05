@@ -1,5 +1,10 @@
-# New language
-This document is compares the New syntax with Typescript/Haskell's syntax.
+# KK language
+Why the name KK?
+- easy to type
+- easy to pronounce
+- audibly distinguishable
+
+This document is compares the KK syntax with Typescript/Haskell's syntax.
 Each syntax decision should be back with reasons, not just taste.
 
 ## Grammar
@@ -205,12 +210,12 @@ slice = (
 slice("Hello", 0)
 slice("Hello", 0, 2)
 // new
-slice = {
+slice = (
   string s,
   number from,
   number to =? s.length,
   ...
-}
+)
 "Hello".slice(0)
 "Hello".slice(0, 2)
 ```
@@ -222,7 +227,7 @@ Keyword arguments does not need special syntax declartion (like OCaml), and keyw
 f = ({a, b, c}: {a: number, b: number, c: number)) => {...}
 f({a: 1, b: 2, c: 3})
 // new
-f = { number a, number b, ...}
+f = (number a, number b, ...)
 1.f(2, c: 3)
 ```
 
@@ -231,44 +236,44 @@ Function application (or invocation) in New uses the universal function call syn
 1. allows IDE to suggestion autocompletion easily
 2. natural function chaining
 
-To opt-out of UFCS, we can use special expression `_` to indicate that we want to invoke a function without passing any arguments.
+To opt-out of UFCS, we can use special expression `!` to indicate that we want to invoke a function without passing any arguments.
 For example:
 ```ts
-moreThan = { 
+moreThan = ( 
   number x,
   number y,
   // body
-}
+)
 // The following are equivalent
 2.moreThan(3)
-.moreThan(2, 3)
+!moreThan(2, 3)
 ```
 
 ### Problems
 Invoking a function of a property of a record becomes weird:
 ```ts
 db = {
-  findUser: {
+  findUser: (
     string id,
     ...
-  }
+  )
 }
 // the following is incorrect
 db.findUser(id: "123")
 
 // The correct version should be
-.(db.findUser)(id: "123")
+!db.findUser(id: "123")
 ```
 *Note: the syntax above needs to be solved, if not it's very awkward*
 ### Swapping argument position
 By default, in the UFCS notation, the first argument binds with the topmost variable. However, we can make the first argument to bind with other variable using keyword arguments.
 For example, suppose we have a minus function:
 ```ts
-minus = {
+minus = (
   number left,
   number right,
   ...
-}
+)
 ```
 Then following are equivalent:
 ```
@@ -286,26 +291,26 @@ Reason:
 
 Currying examples:
 ```ts
-f = {
+f = (
   number a,
   number b,
   number c,
   a.plus(b).minus(c)
-}
+)
 // a and b applied
-x = {number x, 1.f(2, x)}
+x = (number x, 1.f(2, x))
 // same as
 x = 1.f(2,..)
 
 // a and c applied
-y = {number x, 1.f(x, 3)}
+y = (number x, 1.f(x, 3))
 // same as
 y = 1.f(c=3,..)
 
 // b and c applied
-z = {number x, x.f(2, 3)}
+z = (number x, x.f(2, 3))
 // same as
-z = .f(b: 2, c: 3)
+z = !f(b: 2, c: 3)
 ```
 
 ## Types
@@ -322,10 +327,16 @@ type People = {
 }
 ```
 *Note: there's a problem, how do we know the above syntax means an object or a function?*
-### Function types,
+### Function types
+Function type is a list of argument-type pairs, where the last pair represent the return type.
 ```ts
-// Some suggestions
-<T1, T2>{number a, number b, return number}
+// a and b is argument, c is return type
+(\number a, number b, number c) 
+```
+Type parameter is inside angular bracket, for example:
+```ts
+<T>(Array<T> array, int length)
+length = (array, ...)
 ```
 
 ### Tag types
