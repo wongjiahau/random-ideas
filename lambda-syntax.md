@@ -84,8 +84,8 @@ type People = {
 ```
 2. it's more familiar for Typescript user
 ## Function
-In New, function arguments are just variables that are not instantiated with any values.  
-Reason: this allow New to have reduced grammars, which implies that:
+In KK, function arguments are just variables that are not instantiated with any values.  
+Reason: this allow KK to have reduced grammars, which implies that:
 1. parser is easier to write
 2. more consistent syntax (better user experience)
 3. refactoring function produce cleaner diff, for example:
@@ -121,14 +121,14 @@ g = (
 )
 // refactoring does not change much of the original code
 h = (
-  x number,
+  x Float,
   x.cos.sin
 )
 f = (_, 5.h)
 g = (_, 6.h)
 ```
 ### No argument
-There's no function without argument in New, if a function has no argument it's evaluted immediately, the following function in JS and New are equivalent.
+There's no function without argument in KK, if a function has no argument it's evaluted immediately, the following function in JS and New are equivalent.
 ```js
 // js
 const f = (() => {
@@ -162,8 +162,8 @@ _.f
 // js
 f = (x: number): number => x + 1
 f(1)
-// new
-f = {number x, number x.plus(1)}
+// kk
+f = (x Number, x.plus(1) Number)
 1.f
 ```
 
@@ -179,9 +179,9 @@ slice("Hello", 0)
 slice("Hello", 0, 2)
 // new
 slice = (
-  string s,
-  number from,
-  number to =? s.length,
+  s String,
+  from Int,
+  to Int =? s.length,
   ...
 )
 "Hello".slice(0)
@@ -195,7 +195,7 @@ Keyword arguments does not need special syntax declartion (like OCaml), and keyw
 f = ({a, b, c}: {a: number, b: number, c: number)) => {...}
 f({a: 1, b: 2, c: 3})
 // new
-f = (number a, number b, ...)
+f = (a Int, b Int, ...)
 1.f(2, c: 3)
 ```
 
@@ -208,8 +208,8 @@ To opt-out of UFCS, we can use special expression `!` to indicate that we want t
 For example:
 ```ts
 moreThan = ( 
-  number x,
-  number y,
+  x Number,
+  y Number,
   // body
 )
 // The following are equivalent
@@ -222,7 +222,7 @@ Invoking a function of a property of a record becomes weird:
 ```ts
 db = {
   findUser: (
-    string id,
+    id String,
     ...
   )
 }
@@ -238,13 +238,13 @@ By default, in the UFCS notation, the first argument binds with the topmost vari
 For example, suppose we have a minus function:
 ```ts
 minus = (
-  number left,
-  number right,
+  left Number,
+  right Number,
   ...
 )
 ```
 Then following are equivalent:
-```
+```swift
 9.minus(2)
 9.minus(left: 2)
 2.minus(right: 9)
@@ -285,13 +285,13 @@ z = !f(b: 2, c: 3)
 ### Record types
 *Dilemma: if types come before variable, record type will look very awkward.*
 *Another note: I guess it's fine, it can be weird either way*
-```
+```ts
 type People = {
-  String name,
-  {
-    String name,
-    String company
-  } occupation,
+  name String,
+  occupation {
+    name String,
+    company String
+  }
 }
 ```
 *Note: there's a problem, how do we know the above syntax means an object or a function?*
@@ -299,11 +299,11 @@ type People = {
 Function type is a list of argument-type pairs, where the last pair represent the return type.
 ```ts
 // a and b is argument, c is return type
-(\number a, number b, number c) 
+(a Number, b Number, c Number) 
 ```
 Type parameter is inside angular bracket, for example:
 ```ts
-<T>(Array<T> array, int length)
+<T>(array Array<T> , length Int)
 length = (array, ...)
 ```
 
@@ -314,11 +314,11 @@ For example,
 ```ts
 // Error-prone way
 type People = {
-  string id,
-  string phoneNumber,
+  id String,
+  phoneNumber String,
 }
 // Accidentally swapping id with phoneNumber won't trigger compile error
-people = People {
+people People = {
   id: "+60123456789",
   phoneNumber: "1234",
 }
@@ -326,14 +326,14 @@ people = People {
 The situtation above can be improved by using tagged types as such:
 ```ts
 type People = {
-  #Id(string) id,
-  #PhoneNumber(string) phoneNumber
+  id #Id(string),
+  phoneNumber #PhoneNumber(string)
 }
 
 // the following usage will result in compile error
-people = People {
-  id: #PhoneNumber("+60123456789"),
-  phoneNumber: #Id("1234"),
+people People = {
+  id = #PhoneNumber("+60123456789"),
+  phoneNumber = #Id("1234"),
 }
 ```
 
@@ -345,65 +345,56 @@ Reason:
 
 Example:
 ```ts
-type Color = {
-  #red,
-  #green,
-  #blue,
-  #yellow,
-}
+type Color = 
+  | #red
+  | #green
+  | #blue
+  | #yellow
 
-{Color color, return string}
-toHex = {
-  Color color,
-  string color.{
-    #red, "#FF0000";
-    #green, "#00FF00";
-    #blue, "0000FF";
-    other, "unknown";
-  }
+toHex (color Color, String) = {
+  color Color,
+  color.(
+  | #red, "#FF0000"
+  | #green, "#00FF00"
+  | #blue, "0000FF"
+  | other, "unknown"
+  ) String
 }
-#red.toHex.(console.log)
+#red.toHex.log
 ```
 Another example:
 ```ts
-type BinaryTree = <T>{
+type BinaryTree = <T>(
 | #Leaf
 | #Node({
-    T element,
-    T.BinaryTree left,
-    T.BinaryTree right
+    element T,
+    left BinaryTree<T>,
+    right BinaryTree<T>
   })
-}
+)
 
-{
-  Type T,
-  T.BinaryTree tree,
-  T value,
-  return Boolean
-}
-search = {
-  Type T,
-  T.BinaryTree tree,
-  T value,
-  Boolean tree.{
-  |#Leaf, 
+search = <T>(
+  tree: BinaryTree<T>,
+  value: T,
+  tree.(
+  |#Leaf,  
     #False
   |#Node({element, left, right}),
     #False = element.equals(value),
     left.search(value).or(right.search(value))
-  }
-}
+  )
+)
 ```
 
 ## Pattern Matching
 Pattern matching is done with branched function, where the pipe `|` signifies a new branch, for example:
 ```ts
-type Boolean = {| #True | #False}
-{Boolean, Boolean, Boolean} 
-or = {
+type Boolean = #True | #False
+
+or: (Boolean, Boolean, Boolean) = (
   | #False, #False, #False
   | _, _, #True
-}
+)
 
 // Usage
 #True.or(#False)
@@ -413,28 +404,28 @@ Sometimes, we only care about the happy path of a program and we want to ignore 
 For example:
 ```ts
 computeBounds = {
-  number.array xs,
+  xs: Array<Number>,
   sorted = xs.sort,
-  sorted.head.{
+  sorted.head.(
   | #Some(lower), 
-    sorted.last.{
+    sorted.last.(
     | #Some(upper),
         #Some({lower, upper})
     | #None
-    }
+    )
   | #None
-  }
+  )
 }
 ```
 We can rewrite the code above as below to improve the readability using monadic bindings:
 ```ts
-computeBounds = {
-  number.array xs,
+computeBounds = (
+  xs: Array<Number>,
   sorted = xs.sort,
   #Some(lower) = sorted.head, // <- The inferred return type contains #None
   #Some(upper) = sorted.last,
   #Some({lower, upper})
-}
+)
 ```
 How about in the case where we need to call different functions but each of them returns different types?  
 Suppose the same example as above but `head` returns `Option` but `last` returns `Result`. 
@@ -442,18 +433,22 @@ In languages that uses non-polymorphic variants types, you will need to convert 
 Fortunately, in New, you don't have to do all these conversions because variants are polymorphic, meaning that it's ok that the return type can be variants from either `Option` or `Result`.
 For example:
 ```ts
-computeBounds = {
-  number.array xs,
+computeBounds = (
+  xs: Array<Number>,
   sorted = xs.sort,
-  #Some(lower) = sorted.head, // <- The inferred return type is now {| #None }
-  #Ok(upper) = sorted.last, // <- The inferred return type is now {| #None, | #Error(String)}
-  #Some({lower, upper}) // <- The inferred return type is now {| #None, | #Error(String) | #Some({lower: number, upper: number})}
-}
+  #Some(lower) = sorted.head, // <- The inferred return type is now #None
+  #Ok(upper) = sorted.last, // <- The inferred return type is now (#None | #Error(String))
+  #Some({lower, upper}) // <- The inferred return type is now (#None | #Error(String) | #Some({lower: number, upper: number}))
+)
 ```
 Say we use the same example above, but we want to remove the `#Error` variant from the returned result, we can do as such:
 ```ts
 {number.array, {number lower, number upper}.Option}
-computeBounds = {
+
+computeBounds : (
+  Array<Number>, 
+  Option<{lower: Number, upper: Number}>
+) = {
   number.array xs,
   sorted = xs.sort,
   #Some(lower) = sorted.head, 
