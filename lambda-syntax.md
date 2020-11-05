@@ -70,7 +70,7 @@ application
   = expr "." "(" {[identifier ":"] expr ","}* ")"
 ```
 ## Type annotation
-Types comes before variable name like Typescript. Reason:
+Types comes before variable name like Typescript but without colon. Reason:
 1. it's more readable for defining nested record type
 For example: 
 ```hs
@@ -111,7 +111,7 @@ const g = () => h(6)
 // new
 f = (
   _,
-  number x = 5,
+  x number = 5,
   x.cos.sin
 )
 g = (
