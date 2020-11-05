@@ -70,51 +70,19 @@ application
   = expr "." "(" {[identifier ":"] expr ","}* ")"
 ```
 ## Type annotation
-Unlike most modern, New types are like C-like languages, where types comes before expressions. For example, instead of `x: number`, in New it's `number x`.
-Reason:
-1. allows better auto-complete experience in especially for record types, and destrcuturing patterns.
-For example, you will get suggestions of `name` as soon as you reach the cursor.
-```ts
-type People = {string name, number age,}
-p = People {n
-            ^ assuming you typed until here
-```
-2. allow expressions to be typed in a more readable way. Especially with record type, it might look like as if the aliased record type is being use as a constructor, but instead it's just a type assertion.
-For example, 
-```ts
-// In Elm
-answer = {
-  name = "John",
-  kid = {
-    hobby = "game"
-  } : Kid
-} : People
-
-// In New
-answer = People {
-  name: "John",
-  kid: Kid {
-    hobby: "game"
+Types comes before variable name like Typescript. Reason:
+1. it's more readable for defining nested record type
+For example: 
+```hs
+type People = {
+  name String,
+  job {
+    company String,
+    salary Float
   }
 }
 ```
-3. Less boilerplate when asserting the type of the returned expression 
-For example,
-```ts
-// In Typescript
-const square = (x: number) => {
-  const result: number = x * x
-  return result
-}
-
-// In New
-square = (
-  number x,
-  number x.times(x)
-  // ^ asserting the returned expression has number type
-)
-
-```
+2. it's more familiar for Typescript user
 ## Function
 In New, function arguments are just variables that are not instantiated with any values.  
 Reason: this allow New to have reduced grammars, which implies that:
