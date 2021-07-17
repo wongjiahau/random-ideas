@@ -205,7 +205,7 @@ Reference: [JSON specification](https://www.json.org/json-en.html)
 |SQL Inner Join| `a JOIN b on c` | `a join' b 'on c` |
 | Math Range check | `a < b < c` | `a <' b '< c` | 
 | JSON Array | `[1, 2, 3]` | `1 , 2 , 3` | 
-| Function call | `f(x)` | `x |> f` or `f <| x` |
+| Function call | `f(x)` | `x \|> f` or `x <\| f` |
 | Method call | `x.f(y)` | `x f y` |
 
 ## Example
