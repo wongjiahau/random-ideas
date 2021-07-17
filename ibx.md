@@ -208,16 +208,14 @@ Reference: [JSON specification](https://www.json.org/json-en.html)
 | Function call | `f(x)` | `x \|> f` or `x <\| f` |
 | Method call | `x.f(y)` | `x f y` |
 
-## Example
+Factorial:
 ```
 factorial = (n -> (
   1 if' n === 0 'else 
     (n - 1 |> factorial * n)
 ))
 ```
-Notice that lambda is define in reversed, so `a <-
-b` means `b -> a`, this is because IBX is left
-associative.
+
 
 ## Limitations
 The main limitation of IBX is that all constructions are
