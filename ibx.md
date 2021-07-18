@@ -139,26 +139,26 @@ that it allows *natural language emulation*. Again,
 
 Therefore the main features of IBX are:  
 1. First-class infix notation
-2. Left associative
+2. Default right-associative
 
-## Grammar
+## Grammar (EBNF)
 ```ebnf
 ibx 
   = terminal 
   | binary 
   | ternary
 
-(* left associative *)
+(* right associative *)
 binary
-  = ibx space terminal space terminal
+  = terminal space terminal space ibx
 
-(* left associative *)
+(* right associative *)
 ternary
-  = ibx 
+  = terminal 
     space ternary_left 
     space ibx 
     space ternary_right 
-    space terminal
+    space ibx
 
 ternary_left
   = identifier ternary_quote
@@ -171,9 +171,24 @@ ternary_quote
 
 terminal
   = "(" ibx ")"
+  | "{" left_associative_ibx "}"
   | identifier
   | string
   | number
+
+left_associative_ibx
+  = left_associative_binary
+  | left_associative_ternary
+
+left_associative_binary
+  = ibx space terminal space terminal
+
+left_associative_ternary
+  = ibx 
+    space ternary_left 
+    space ibx 
+    space ternary_right 
+    space terminal
 
 identifier
   (* note: one_of should be treated as an EBNF-level function *)
@@ -182,9 +197,21 @@ identifier
     identifier
   | identifier ternary_quote ternary_quote identifier
 
-string = (* follows JSON specification of string *)
-number = (* follows JSON specification of number *)
-space = (* follows JSON specification of ws *)
+string 
+  = (* follows JSON specification of string *)
+
+number 
+  = (* follows JSON specification of number *)
+
+space 
+  = comment
+  | whitespace 
+
+comment 
+  = (* to be decided *)
+
+whitespace
+  = (* follows JSON specification of ws *)
 ```
 Reference: [JSON specification](https://www.json.org/json-en.html)
 
@@ -194,9 +221,11 @@ Reference: [JSON specification](https://www.json.org/json-en.html)
 | --|--| -- |  -- |
 | Binary operator | `x f y` | `(f x y)` | -- |
 | Ternary operator | `x f' y 'g z` | `(f''g x y z)` | `f''g` is a single identifier | 
-| Left associative | `x f y g z` | `(g (f x y) z)`| | 
+| Right associative | `x f y g z` | `(f x (g y z))`| | 
+| Left associative bracket| `{x f y g z}` | `(g (f x y) z)` | Associativity becomes left inside curly brackets. | 
 | Ternary center higher precendence | `x f' a b c 'g z` | `(f''g x (b a c) z)` | Treat `f'` as opening bracket `(`, and `'g` as closing bracket `)` |
 | Ternary operator behaves like binary operator | `x f' y 'g z j k` | `(j (f''g x y z) k)` | Treat `f' ... 'g` as a binary operator |  
+
 
 ## Emulation Examples
 |Language| Partial Snippet | IBX Emulation|
@@ -210,36 +239,18 @@ Reference: [JSON specification](https://www.json.org/json-en.html)
 
 Factorial:
 ```
-factorial = (n -> (
-  1 if' n === 0 'else 
-    (n - 1 |> factorial * n)
-))
+factorial = n -> 
+  1 if' n === 0 'else
+    (n * factorial <| n - 1)
 ```
 
-
-## Limitations
-The main limitation of IBX is that all constructions are
-left-associative, this poses a problem when we try to emulate naturally right-associative constructs.
-
-For example, in Javascript, lambda and assignment are right-associative:
-```js
-f = x => y => z
-
-g = (x => (y => z))
-
-// f and g are equivalent
+Filter, map,reduce:
+```sh
+# We use curly bracket to enforce left-associativity
+{
+  (1 , 2 , 3)
+    . filter (> . 1)
+    . map (+ . 1)
+    . reduce (+ , 0)
+}
 ```
-
-Since IBX is left-associative, there's two way to emulate:
-1. Use parenthesis
-```
-f = (x => (y => z))
-```
-2. Invert the syntax
-```
-z <= y <= x = f
-```
-
-In my opinion, both workarounds are not optimal as they
-read worse than their original counterpart.
-
