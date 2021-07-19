@@ -254,3 +254,7 @@ Filter, map,reduce:
     . reduce (+ , 0)
 }
 ```
+
+## Unresolved
+- How to have list?
+- How to emulate key-value pairs like JSON?
