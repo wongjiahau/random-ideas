@@ -157,11 +157,15 @@ ternary
   = terminal 
     space ternary_left 
     space ibx 
+    (space ternary_middle ibx)*
     space ternary_right 
     space ibx
 
 ternary_left
   = identifier ternary_quote
+
+ternary_middle
+  = ternary_quote middle ternary_quote
 
 ternary_right
   = ternary_quote identifier
