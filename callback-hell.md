@@ -27,16 +27,16 @@ getApple((err, apples) => {
 ```
 
 Basically, it is a pyramid of callback functions which is **hard to read** due to:
-1. Descending indentations
+1. Ascending indentations
 2. Lots of parentheses
 
-These problem is not just unique to JavaScript, therefore other languages also
+This problem is not just unique to JavaScript, therefore other languages also
 has their own remedies.
 
 Though these remedies are fine, they are mostly made of syntactic sugar, which 
 some language designers might find it nauseous (at least for me), because
 there's only so much sugar that you can stuff before your language is causing
-diabetes (decision fatigue) to the user.
+diabetes (decision fatigue) to the user, and to the language designers.
 
 We will go through each of the remedy, and finally I'll present to you the
 *sugarless* solution.
@@ -54,17 +54,15 @@ getApple.then(apples =>
   )
 )
 ```
-Though the code looks shorter where error handling is implicit, 
-we can still see that this will eventually descend into callback hell, though
-slower.
+Though the code looks shorter due to implicit error handling, this will
+eventually descend into callback hell, though slower.
 
 
 ## Remedy 1: Async/await
 The most popular solution is probably async/await, pioneered by C#, and
 eventually adopted by a lot of languages including JavaScript.
 
-With async/await, the aforementioned code can be transformed into (assuming we
-promisify the functions):
+With async/await, the above code can be transformed into:
 ```js
 let apples = await getApple
 let bananas = await getBanana
@@ -135,7 +133,7 @@ Inverted means that:
 - Body comes before parameter, for example `body <- parameter`
 - The parameter-body separator is left-associative, for example `c <- b <- a` means `(c <- b) <- a`
 
-By naively translating the promise example (note that the arguments of `then`
+By naively translating the Promise example (note that the arguments of `then`
 is flipped), we will get this:
 ```
 [apples, bananas] |> sendFruits
@@ -158,3 +156,5 @@ And notice how there is no callback-hell at all, and thus no remedies are requir
 
 Of course, this syntax is not without downsides, most notably user have to read
 from bottom to top to follow the order of evaluation.
+
+Thanks for reading!
