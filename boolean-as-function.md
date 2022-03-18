@@ -12,6 +12,15 @@ a false b = a
 Does this works well for left-associative syntax?
 Because it forces the condition list to be reversed.
 
+To solve this issue, we can allow function to be right-associative, say by prefixing function with `#`.
+
+Example:
+
+```
+a b c d e = (a b c) d e
+a #b c d e = a b (c d e)
+```
+
 ## Example 1 (a true b = b; left-associative):
 
 ```
