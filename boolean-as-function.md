@@ -12,7 +12,7 @@ a false b = a
 Does this works well for left-associative syntax?
 Because it forces the condition list to be reversed.
 
-## Example 1 (a true b = b):
+## Example 1 (a true b = b; left-associative):
 
 ```
 score grade () =
@@ -22,7 +22,7 @@ score grade () =
     (score > 80) `A`
 ```
 
-## Example 2 (a true b = a):
+## Example 2 (a true b = a; left-associative):
 
 ```
 score grade () =
@@ -40,6 +40,26 @@ score grade () =
     (score > 80) `B`
     (score > 60) `C`
     (score > 40) `F`
+```
+
+## Example 3 (a true b = b; right-associative):
+
+```
+score grade () =
+  `F`
+    (score > 40) `C`
+    (score > 60) `B`
+    (score > 80) `A`
+```
+
+## Example 4 (a true b = b; right-associative):
+
+```
+score grade () =
+  `A` (score > 80)
+  `B` (score > 60)
+  `C` (score > 40)
+  `F`
 ```
 
 ## Evaluation strategy
