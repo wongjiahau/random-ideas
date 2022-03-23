@@ -14,10 +14,11 @@ Examples:
 
 ```
 // Without using dot syntax
-(([1, 2, 3]
-  map x -> x + 2)
-    filter x -> x > 3)
-      print
+
+print |
+  (x -> x + 2) map
+    (x -> x > 3) filter
+      [1, 2, 3]
 
 // With dot syntax
 [1, 2, 3]
