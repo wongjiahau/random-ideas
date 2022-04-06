@@ -34,27 +34,32 @@ Notice how the usage of `else` is cumbersome because of `() ->`
 
 We can mimic the closure syntax of Ruby which is just `{}`.
 
-Then the syntax for lambda is `{(params ',')* body}`.
+Then the syntax for lambda is `{(params ':')* body}`.
 
 The above example can be re-written as such:
 
 ```
-default else branches:
-  branches
-    List.findMap { cond `then` value,
-      cond call () match (
-        true: value call () `some` (),
-        false:  `none`
-      )
-    }
-    match (
-      value `some` (): value,
-      `none`: default call ()
-    )
+(
+  else: { default: branches:
+    branches
+      List.findMap { cond `then` value:
+          cond | call match {
+            true: value | call `some` (),
+            false:  `none`
+          }
+      }
+      match {
+        value `some` (): value,
+        `none`: default call ()
+      }
+  }
 
-`F`
-  unless [
-    { score > 80 } `then` { `A` },
-    { score > 60 } `then` { `B` },
-  ]
+  `F`
+    unless [
+      { score > 80 } `then` { `A` },
+      { score > 60 } `then` { `B` },
+    ]
+)
 ```
+
+Then, the object for syntax becomes `'(' (pattern ':' value ',')* ')' | '()'`.
