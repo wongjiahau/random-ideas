@@ -52,7 +52,7 @@ The above example can be re-written as such:
         value `some` (): value,
         `none`: default call ()
       }
-  }
+  },
 
   `F`
     unless [
@@ -63,3 +63,15 @@ The above example can be re-written as such:
 ```
 
 Then, the object for syntax becomes `'(' (pattern ':' value ',')* ')' | '()'`.
+
+## Question
+
+1. Do we need to have syntax sugar for closure with multiple params like Haskell?
+   Currently, multiple params closure is written in a curried way:
+
+```
+(plus: { x: { y: x + y } })
+```
+
+Maybe we can have it this way:
+`{x: {y: body}}` same as `{x: y: body}`
