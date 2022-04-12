@@ -26,3 +26,25 @@ Primarily:
 ## Proposal
 
 Type can be scoped.
+
+```
+(
+  named type List: {
+    a: [
+      a 'cons' (a | List),
+      'nil'
+    ]
+  },
+
+  alias type RGB: Int,
+)
+```
+
+To convert to and from named type, use the `::` operator:
+
+```
+(
+  named type Color: Int '' Int '' Int,
+  myColor: 255 '' 0 '' 255 :: Color
+)
+```
