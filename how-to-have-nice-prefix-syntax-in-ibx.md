@@ -10,9 +10,17 @@ And this applies to variants with single argument.
 
 For example: `'Ok' <| 1` as opposed to `Ok(1)`
 
-## Proposal
+## Why prefix is necessary?
+
+Prefix syntax is necessary for constructing some DSL, for example HTML.
+
+## Proposal 1
 
 Using backslash, for example: `f \ x ` is the same as `x | f`.
+
+## Proposal 2
+
+Treat `a b` as `a(b)`, and `a b c d` as `a(c(b,d))`, and so on and so forth.
 
 ## Question
 
