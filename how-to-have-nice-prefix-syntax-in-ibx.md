@@ -12,7 +12,7 @@ For example: `'Ok' <| 1` as opposed to `Ok(1)`
 
 ## Proposal
 
-No idea yet.
+Using backslash, for example: `f \ x ` is the same as `x | f`.
 
 ## Question
 
