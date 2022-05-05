@@ -4,7 +4,7 @@
 
 This article explore syntax ideas that simplifies the creation of DSL.
 
-## Proposal
+## Proposal 1
 
 In a language, we can have 4 types of identifiers:
 
@@ -70,6 +70,28 @@ For example (special wrapper is triple quote, to interpolate use `\()`):
   bigNum: 'n' 'of' 999,
   main: {
     '''(n of 1) + \(bigNum) + (n of 3)''' | eval
+  }
+)
+```
+
+## Proposal 3
+
+Allow union between named types.
+
+For example (compare to Proposal 1):
+
+```js
+(
+  'eval': {
+    'a' + 'b':
+      'a' | 'eval' '+' ('b' | 'eval'),
+
+    'x' :: int:
+      'x'
+  },
+
+  'main': {
+    1 + 2 + 3 | 'eval'
   }
 )
 ```

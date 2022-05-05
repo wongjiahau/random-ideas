@@ -22,6 +22,17 @@ Using backslash, for example: `f \ x ` is the same as `x | f`.
 
 Treat `a b` as `a(b)`, and `a b c d` as `a(c(b,d))`, and so on and so forth.
 
+## Proposal 3
+
+Treat `'f` as a function that consumes 1 argument.  
+Treat `"f` as a function that consumes 2 arguments.
+
+For example,
+
+```
+("f a 'g c ) = ("f a ('g c))
+```
+
 ## Question
 
 Is prefix syntax necessary?
