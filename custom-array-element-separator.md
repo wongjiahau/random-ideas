@@ -43,3 +43,28 @@ DSL example (conditional):
 2. Should we have another bracket for array that use comma as separator?
 
 > Perhaps we can use `[| |]` and `[ ]`.
+
+## Proposal 2
+
+Let each element be separatable using multiple separators defined between `[` and `|`.
+
+For example:
+
+```
+[if then|
+  if { x > 80 } then { 'A' }
+  if { x > 60 } then { 'B' }
+]
+```
+
+`if` is used for separating elements within the array, `then` is used as separator within a tuple.
+
+Also `if` and `then` will have the lowest precedence, except that they have higher precedence than brackets.
+
+The above array has the type of `({ Boolean }, {['A', 'B']}) | List`.
+
+## Question
+
+It is very verbose for user to keep defining the separator tokens, perhaps the type system can determine it?
+However, this means that typechecking has to be run before parsing at some
+point, which can complicate the interpreter architecture.
