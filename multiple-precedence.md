@@ -30,13 +30,13 @@ expression.
 Say $symbol is `.`:
 
 ```
-3 + 2 .> 5 ..or something ...and 1 + 2 ..or 3
+3 + 2 .> 5 ..or something ...and 1 + 2 ..or 3 ...and hello
 ```
 
 Will be parsed as:
 
 ```
-(((3 + 2) > 5) or something) and ((1 + 2) or 3)
+((((3 + 2) > 5) or something) and ((1 + 2) or 3)) and hello
 ```
 
 Another example, right-associative cons list:
