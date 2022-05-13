@@ -29,3 +29,17 @@ This was implemented in the previous version of KK, where the compiler can
 determine which function is being called based on the type of the first argument.
 
 However, this will require typechecking.
+
+Single Dispatch also allows tagged union to be used in a more ergonomic way.
+
+Instead of writing:
+
+```
+1 '+' 2
+```
+
+We can write:
+
+```
+1 + 2
+```
