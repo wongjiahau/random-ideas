@@ -33,6 +33,65 @@ For example,
 ("f a 'g c ) = ("f a ('g c))
 ```
 
+## Proposal 4
+
+Have an operator `o`, such that `f o x` means `f(x)`.
+For example, say we represent `o` as `:`:
+
+```
+#{
+  if: condition: body = condition: () {
+    true -> body: (),
+    false -> #{
+      else: other = other: ()
+    }
+  },
+
+  example: () =
+    if: { 3 > 4 }: {
+      `Fine`
+    }
+    else: {
+      `Nope`
+    }
+}
+```
+
+Cons of this proposal is that `:` cannot be used for type annotations anymore.
+
+## Proposal 5
+
+Haskell-like syntax, where `f x` means `f(x)`. Then add-on `x.f` means `f(x)`.
+
+Example:
+
+```
+#{
+  if condition body = condition.{
+    true -> body (),
+    false -> {
+      elif condition body = if condition body,
+      else other = other ()
+    }
+  },
+
+  example () =
+    if { 3 > 4 } {
+      `Fine`
+    }
+    .elif { xs.some { it > 2 } } {
+      `Oh`
+    }
+    .else {
+      `Ok`
+    }
+}
+```
+
 ## Question
 
 Is prefix syntax necessary?
+
+```
+yes
+```
