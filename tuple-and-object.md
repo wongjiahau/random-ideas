@@ -68,3 +68,51 @@ Use `key:` for record punning.
 ```
 
 This is the best so far as it allows DSL to be created easily, yet no ambiguity.
+
+## Syntax D
+
+Grammar:
+
+```
+object
+  = '{' (element (',' element)*)? '}'
+
+element
+  = keyValue
+  | value
+
+keyValue
+  = id ':' expression
+  | id
+
+value
+  = nonIdExpression
+  | '(' expression ')'
+
+nonIdExpression
+  = string
+  | number
+  | object
+
+expression
+  | id
+  | nonIdExpression
+```
+
+Example:
+
+```
+x = 22
+y = {99, x, (x), z: 123}
+
+y."0" // 99
+y."1" // 22
+y.x // 22
+y.z // 123
+```
+
+DSL Example:
+
+```
+1 between { 2, and: 3 }
+```
